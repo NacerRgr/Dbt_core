@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: medical_data  
+    database: projet4a  
+    schema: airbyte_schema  
+    tables:
+      - name: cardio_train
+      - name: healthcare_dataset

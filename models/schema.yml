@@ -1,0 +1,23 @@
+
+version: 2
+
+models:
+  - name: cardio_train_stg
+    description: "staging for cardio_train"
+    columns:
+     - name: id_cardio_train 
+       description: "The primary key for this table id_cardio_train"
+       tests:
+          - unique
+          - not_null
+
+  - name: healthcare_dataset_stg
+    description: "staging for helthcare_dataset"
+    columns:
+      - name: id_healthcare 
+        description: "The primary key for this table id_cardio_train"
+        tests:
+              - unique
+              - not_null
+
+
