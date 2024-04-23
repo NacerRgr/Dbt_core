@@ -9,8 +9,8 @@ WITH source AS (
         "Test Results"::VARCHAR as test_results,
         doctor::VARCHAR as doctor,
         CASE 
-            WHEN gender = 'male' THEN 1
-            WHEN gender = 'female' THEN 2
+            WHEN gender = 'Male' THEN 1
+            WHEN gender = 'Female' THEN 2
             ELSE NULL -- Gérer les cas inattendus
         END as gender_enum,
         "Admission Type"::VARCHAR as admission_type,
@@ -25,7 +25,8 @@ WITH source AS (
         medication::VARCHAR as medication,
         hospital::VARCHAR as hospital,
         "Medical Condition"::VARCHAR as medical_condition,
-        CAST(age AS INT) as age
+        CAST(age AS INT) as age,
+        _airbyte_emitted_at as Time_stamp 
     FROM {{ source('medical_data', 'healthcare_dataset') }}
 ),
 

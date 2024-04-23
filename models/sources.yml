@@ -7,3 +7,7 @@ sources:
     tables:
       - name: cardio_train
       - name: healthcare_dataset
+      - name: heart
+      - name: hospital_readmissions
+      - name: mental_health_dataset
+      

@@ -20,4 +20,111 @@ models:
               - unique
               - not_null
 
+  - name: heart_stg
+    description: "staging for heart"
+    columns:
+      - name: id_heart 
+        description: "The primary key for this table heart"
+        tests:
+              - unique
+              - not_null
+
+  - name: hospital_readmissions_stg
+    description: "hospital_readmissions staging"
+    columns:
+      - name: id_readmission 
+        description: "The primary key for this table readmission"
+        tests:
+              - unique
+              - not_null
+
+  - name: mental_health_stg
+    description: "mental_health_stg staging"
+    columns:
+      - name: id_mental 
+        description: "The primary key for this table readmission"
+        tests:
+              - unique
+              - not_null
+
+  - name: dim_patient
+    description: "Table de dimension qui répertorie les attributs uniques pour chaque patient."
+    columns:
+      - name: patient_id
+        description: "Identifiant unique pour chaque patient, correspondant à id_healthcare dans la source de données."
+        tests:
+          - unique
+          - not_null
+
+      - name: patient_name
+        description: "Nom du patient."
+        tests:
+          - not_null
+
+      - name: patient_age
+        description: "Âge du patient."
+        tests:
+          - not_null
+
+      - name: blood_type
+        description: "Groupe sanguin du patient."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['A', 'B', 'AB', 'O', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+
+      - name: gender
+        description: "Genre du patient, dérivé de gender_enum avec 1 pour 'Male' et 2 pour 'Female'."
+        tests:
+          - accepted_values:
+              values: [1, 2]  # Vous devez déterminer si d'autres valeurs sont possibles et les inclure ici si nécessaire.
+
+      - name: dim_hospital
+        description: "Dimension table for hospitals based on available staging data."
+        columns:
+          - name: hospital_id
+            description: "Unique identifier for the hospital."
+            tests:
+              - unique
+              - not_null
+
+          - name: hospital_name
+            description: "The name of the hospital."
+            tests:
+              - unique
+              - not_null
+
+          - name: patient_count
+            description: "The count of unique patients treated in the hospital."
+            
+          - name: room_count
+            description: "The count of unique rooms used in the hospital."
+
+
+      - name: dim_doctor
+        description: "La table de dimension pour les médecins comprenant des informations sur leur hôpital et leur spécialité médicale."
+        columns:
+            - name: doctor_id
+              description: "Identifiant unique pour chaque médecin généré par ordre alphabétique des noms."
+              tests:
+                - unique
+                - not_null
+
+            - name: doctor_name
+              description: "Le nom du médecin."
+              tests:
+                - not_null
+
+            - name: hospital
+              description: "L'hôpital où travaille le médecin."
+
+            - name: medical_specialty
+              description: "La spécialité médicale du médecin."
+
+            - name: patient_count
+              description: "Le nombre de patients associés au médecin."
+              tests:
+                - not_null
+
+
 
