@@ -1,130 +1,223 @@
-
 version: 2
 
 models:
   - name: cardio_train_stg
-    description: "staging for cardio_train"
+    description: "Staging for cardio_train."
     columns:
-     - name: id_cardio_train 
-       description: "The primary key for this table id_cardio_train"
-       tests:
+      - name: id_cardio_train 
+        description: "Primary key for the cardio_train_stg table."
+        tests:
           - unique
           - not_null
 
   - name: healthcare_dataset_stg
-    description: "staging for helthcare_dataset"
+    description: "Staging for healthcare_dataset."
     columns:
       - name: id_healthcare 
-        description: "The primary key for this table id_cardio_train"
-        tests:
-              - unique
-              - not_null
-
-  - name: heart_stg
-    description: "staging for heart"
-    columns:
-      - name: id_heart 
-        description: "The primary key for this table heart"
-        tests:
-              - unique
-              - not_null
-
-  - name: hospital_readmissions_stg
-    description: "hospital_readmissions staging"
-    columns:
-      - name: id_readmission 
-        description: "The primary key for this table readmission"
-        tests:
-              - unique
-              - not_null
-
-  - name: mental_health_stg
-    description: "mental_health_stg staging"
-    columns:
-      - name: id_mental 
-        description: "The primary key for this table readmission"
-        tests:
-              - unique
-              - not_null
-
-  - name: dim_patient
-    description: "Table de dimension qui répertorie les attributs uniques pour chaque patient."
-    columns:
-      - name: patient_id
-        description: "Identifiant unique pour chaque patient, correspondant à id_healthcare dans la source de données."
+        description: "Primary key for the healthcare_dataset_stg table."
         tests:
           - unique
           - not_null
 
-      - name: patient_name
-        description: "Nom du patient."
+  - name: heart_stg
+    description: "Staging for heart."
+    columns:
+      - name: id_heart 
+        description: "Primary key for the heart_stg table."
         tests:
+          - unique
           - not_null
 
-      - name: patient_age
-        description: "Âge du patient."
+  - name: readmission_hospital_stg
+    description: "Staging for hospital readmissions."
+    columns:
+      - name: id_readmisson 
+        description: "Primary key for the readmission_hospital_stg table."
         tests:
+          - unique
           - not_null
 
-      - name: blood_type
-        description: "Groupe sanguin du patient."
+  - name: mental_health_stg
+    description: "Staging for mental health."
+    columns:
+      - name: id_mental 
+        description: "Primary key for the mental_health_stg table."
         tests:
+          - unique
           - not_null
-          - accepted_values:
-              values: ['A', 'B', 'AB', 'O', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
-      - name: gender
-        description: "Genre du patient, dérivé de gender_enum avec 1 pour 'Male' et 2 pour 'Female'."
+  - name: patient_dim
+    description: "Dimension table listing unique attributes for each patient."
+    columns:
+      - name: id_patient
+        description: "Unique identifier for each patient, corresponding to id_healthcare in the source data."
         tests:
-          - accepted_values:
-              values: [1, 2]  # Vous devez déterminer si d'autres valeurs sont possibles et les inclure ici si nécessaire.
+          - unique
+          - not_null
 
-      - name: dim_hospital
-        description: "Dimension table for hospitals based on available staging data."
-        columns:
-          - name: hospital_id
-            description: "Unique identifier for the hospital."
-            tests:
-              - unique
-              - not_null
+  - name: hospital_dim
+    description: "Dimension table for hospitals based on available staging data."
+    columns:
+      - name: hospital_id
+        description: "Unique identifier for the hospital."
+        tests:
+          - unique
+          - not_null
 
-          - name: hospital_name
-            description: "The name of the hospital."
-            tests:
-              - unique
-              - not_null
+  - name: doctor_dim
+    description: "Dimension table for doctors including information on their hospital and medical specialty."
+    columns:
+      - name: doctor_id
+        description: "Unique identifier for each doctor generated in alphabetical order of names."
+        tests:
+          - unique
+          - not_null
 
-          - name: patient_count
-            description: "The count of unique patients treated in the hospital."
-            
-          - name: room_count
-            description: "The count of unique rooms used in the hospital."
+  - name: fct_admission
+    description: "Fact table for admissions."
+    columns:
+        - name: id_admission
+          description: "Unique identifier for the admission."
+          tests:
+            - unique
+            - not_null
+        - name: id_patient
+          description: "Foreign key reference to the unique patient identifier in the patient_dim."
+          tests:
+            - foreign_key:
+                target_model: ref('patient_dim')
+                field: id_patient
+        - name: doctor_id
+          description: "Foreign key reference to the unique doctor identifier in the doctor_dim."
+          tests:
+            - foreign_key:
+                target_model: ref('doctor_dim')
+                field: doctor_id
+        - name: hospital_id
+          description: "Foreign key reference to the unique hospital identifier in the hospital_dim."
+          tests:
+            - foreign_key:
+                target_model: ref('hospital_dim')
+                field: hospital_id
+        - name: id_rdv
+          description: "Foreign key reference to the unique rendezvous identifier in the rdv_dim."
+          tests:
+            - foreign_key:
+                target_model: ref('rdv_dim')
+                field: rdv_id
 
-
-      - name: dim_doctor
-        description: "La table de dimension pour les médecins comprenant des informations sur leur hôpital et leur spécialité médicale."
-        columns:
-            - name: doctor_id
-              description: "Identifiant unique pour chaque médecin généré par ordre alphabétique des noms."
+  - name: fct_traitement_maladie
+    description: "Fact table for the treatment of diseases."
+    columns:
+            - name: id_trt_maladie
+              description: "Unique identifier for the treatment of a disease."
               tests:
                 - unique
                 - not_null
-
-            - name: doctor_name
-              description: "Le nom du médecin."
+            - name: id_patient
+              description: "Foreign key to the unique patient identifier."
               tests:
-                - not_null
-
-            - name: hospital
-              description: "L'hôpital où travaille le médecin."
-
-            - name: medical_specialty
-              description: "La spécialité médicale du médecin."
-
-            - name: patient_count
-              description: "Le nombre de patients associés au médecin."
+                - foreign_key:
+                    target_model: ref('patient_dim')
+                    field: id_patient
+            - name: id_dossier_medical
+              description: "Foreign key to the unique medical file identifier."
               tests:
-                - not_null
+                - foreign_key:
+                    target_model: ref('dossier_med_dim')
+                    field: id_dossier_medical
+            - name: id_docteur
+              description: "Foreign key to the unique doctor identifier."
+              tests:
+                - foreign_key:
+                    target_model: ref('doctor_dim')
+                    field: doctor_id
+            - name: resultat_test
+              description: "Results of the medical test."
+            - name: traitement_a_faire
+              description: "Treatment to be performed."
+            - name: time_stamp
+              description: "Timestamp when the record was created or modified."
 
+              version: 2
 
+  - name: fct_visite_urgence
+    description: "Table de faits représentant les visites d'urgence. Stocke des informations sur chaque visite, y compris les détails du patient, de l'hôpital, du médecin, et le rendez-vous associé."
+    columns:
+      - name: id_urgent_visite
+        description: "Identifiant unique de la visite d'urgence."
+        tests:
+          - unique
+          - not_null
 
+      - name: id_patient
+        description: "Clé étrangère faisant référence à l'identifiant unique du patient dans la dimension patient."
+        tests:
+          - not_null
+          - foreign_key:
+              target_model: ref('patient_dim')
+              field: id_patient
+
+      - name: id_hopital
+        description: "Clé étrangère faisant référence à l'identifiant unique de l'hôpital dans la dimension hospital."
+        tests:
+          - not_null
+          - foreign_key:
+              target_model: ref('hospital_dim')
+              field: hospital_id
+
+      - name: id_docteur
+        description: "Clé étrangère faisant référence à l'identifiant unique du docteur dans la dimension doctor."
+        tests:
+          - not_null
+          - foreign_key:
+              target_model: ref('doctor_dim')
+              field: doctor_id
+
+      - name: id_rdv
+        description: "Clé étrangère faisant référence à l'identifiant unique du rendez-vous dans la dimension rdv."
+        tests:
+          - not_null
+          - foreign_key:
+              target_model: ref('rdv_dim')
+              field: rdv_id
+
+      - name: date_visite
+        description: "Date à laquelle la visite d'urgence a eu lieu."
+        tests:
+          - not_null
+
+      - name: type_visite
+        description: "Type de la visite, indiquant la nature de l'urgence ou du traitement."
+        tests:
+          - not_null
+
+      - name: duree_hospitalisation
+        description: "Durée totale de l'hospitalisation du patient suite à la visite d'urgence, mesurée en jours ou en heures."
+
+      - name: specialite_medicale
+        description: "La spécialité médicale traitant le patient lors de la visite d'urgence, par exemple cardiologie ou orthopédie."
+
+      - name: diag_1
+        description: "Premier diagnostic établi lors de la visite d'urgence."
+
+      - name: diag_2
+        description: "Deuxième diagnostic établi lors de la visite d'urgence."
+
+      - name: diag_3
+        description: "Troisième diagnostic établi lors de la visite d'urgence."
+
+      - name: nb_urgences
+        description: "Nombre de visites d'urgence faites par le patient jusqu'à la date."
+
+      - name: nb_medicaments
+        description: "Nombre de médicaments prescrits lors de la visite d'urgence."
+
+      - name: admission_date
+        description: "Date d'admission du patient à l'hôpital lors de la visite d'urgence."
+
+      - name: admission_type
+        description: "Type d'admission, par exemple urgente ou programmée."
+
+      - name: time_stamp
+        description: "Timestamp de l'enregistrement de l'événement dans le système."
