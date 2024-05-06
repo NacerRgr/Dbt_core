@@ -72,40 +72,56 @@ models:
         tests:
           - unique
           - not_null
+    version: 2
 
   - name: fct_admission
-    description: "Fact table for admissions."
+    description: "Fact table for admissions storing core information about patient admissions."
     columns:
-        - name: id_admission
-          description: "Unique identifier for the admission."
-          tests:
-            - unique
-            - not_null
-        - name: id_patient
-          description: "Foreign key reference to the unique patient identifier in the patient_dim."
-          tests:
-            - foreign_key:
-                target_model: ref('patient_dim')
-                field: id_patient
-        - name: doctor_id
-          description: "Foreign key reference to the unique doctor identifier in the doctor_dim."
-          tests:
-            - foreign_key:
-                target_model: ref('doctor_dim')
-                field: doctor_id
-        - name: hospital_id
-          description: "Foreign key reference to the unique hospital identifier in the hospital_dim."
-          tests:
-            - foreign_key:
-                target_model: ref('hospital_dim')
-                field: hospital_id
-        - name: id_rdv
-          description: "Foreign key reference to the unique rendezvous identifier in the rdv_dim."
-          tests:
-            - foreign_key:
-                target_model: ref('rdv_dim')
-                field: rdv_id
+      - name: id_admission
+        description: "Unique identifier for each admission."
+        tests:
+          - unique
+          - not_null
 
+      - name: id_patient
+        description: "Foreign key reference to the unique patient identifier in the patient_dim."
+        tests:
+          - not_null
+          - foreign_key:
+              target_model: ref('patient_dim')
+              field: id_patient
+
+      - name: hospital_id
+        description: "Foreign key reference to the unique hospital identifier in the hospital_dim."
+        tests:
+          - not_null
+          - foreign_key:
+              target_model: ref('hospital_dim')
+              field: hospital_id
+
+      - name: doctor_id
+        description: "Foreign key reference to the unique doctor identifier in the doctor_dim."
+        tests:
+          - not_null
+          - foreign_key:
+              target_model: ref('doctor_dim')
+              field: doctor_id
+
+      - name: date_of_admission
+        description: "The date on which the patient was admitted to the hospital."
+        tests:
+          - not_null
+
+      - name: room_number
+        description: "Room number assigned to the patient during the admission."
+        tests:
+          - not_null
+
+      - name: billing_amount
+        description: "Total billing amount charged for the admission."
+        tests:
+          - not_null
+    
   - name: fct_traitement_maladie
     description: "Fact table for the treatment of diseases."
     columns:
@@ -139,7 +155,7 @@ models:
             - name: time_stamp
               description: "Timestamp when the record was created or modified."
 
-              version: 2
+            
 
   - name: fct_visite_urgence
     description: "Table de faits représentant les visites d'urgence. Stocke des informations sur chaque visite, y compris les détails du patient, de l'hôpital, du médecin, et le rendez-vous associé."
