@@ -1,53 +1,49 @@
 {{ config(materialized='table') }}
 
-
 WITH source AS (
     SELECT
-        ROW_NUMBER() OVER () AS{{ config(materialized='table') }}
- id_readmisson, -- Ajoute d'un identifiant unique pour chaque ligne
+        ROW_NUMBER() OVER () AS id_readmission,  -- Génère un ID unique pour chaque ligne
         CASE 
             WHEN readmitted = 'no' THEN 'no'
             WHEN readmitted = 'yes' THEN 'yes'
-            ELSE NULL -- Gestion des valeurs inattendues
+            ELSE 'unknown'  -- Gestion des valeurs inattendues avec un fallback sûr
         END as readmitted_enum,
-        CAST(n_inpatient AS INT) as n_inpatient,
-        diag_1::VARCHAR as diag_1,
-        CAST(n_lab_procedures AS INT) as n_lab_procedures,
-        diag_3::VARCHAR as diag_3,
-        CAST(n_outpatient AS INT) as n_outpatient,
+        COALESCE(CAST(n_inpatient AS INT), 0) as n_inpatient,
+        COALESCE(diag_1, 'Not Specified')::VARCHAR as diag_1,
+        COALESCE(CAST(n_lab_procedures AS INT), 0) as n_lab_procedures,
+        COALESCE(diag_3, 'Not Specified')::VARCHAR as diag_3,
+        COALESCE(CAST(n_outpatient AS INT), 0) as n_outpatient,
         CASE 
             WHEN change = 'no' THEN 'no'
             WHEN change = 'yes' THEN 'yes'
-            ELSE NULL -- Gestion des valeurs inattendues
+            ELSE 'unknown'  -- Gestion des valeurs inattendues avec un fallback sûr
         END as change_enum,
-        diag_2::VARCHAR as diag_2,
+        COALESCE(diag_2, 'Not Specified')::VARCHAR as diag_2,
         CASE 
             WHEN diabetes_med = 'no' THEN 'no'
             WHEN diabetes_med = 'yes' THEN 'yes'
-            ELSE NULL -- Gestion des valeurs inattendues
+            ELSE 'unknown'  -- Gestion des valeurs inattendues avec un fallback sûr
         END as diabetes_med_enum,
-        CAST(time_in_hospital AS INT) as time_in_hospital,
-        medical_specialty::VARCHAR as medical_specialty,
+        COALESCE(CAST(time_in_hospital AS INT), 0) as time_in_hospital,
+        COALESCE(medical_specialty, 'Not Specified')::VARCHAR as medical_specialty,
         CASE 
             WHEN glucose_test = 'no' THEN 'no'
             WHEN glucose_test = 'yes' THEN 'yes'
-            ELSE NULL -- Gestion des valeurs inattendues
+            ELSE 'unknown'  -- Gestion des valeurs inattendues avec un fallback sûr
         END as glucose_test_enum,
-        CAST(n_procedures AS INT) as n_procedures,
-        a1ctest::VARCHAR as a1ctest,
-        age::VARCHAR as age, -- Supposé qu'il n'est pas nécessaire de convertir en int
-        CAST(n_emergency AS INT) as n_emergency,
-        CAST(n_medications AS INT) as n_medications
+        COALESCE(CAST(n_procedures AS INT), 0) as n_procedures,
+        COALESCE(a1ctest, 'Not Specified')::VARCHAR as a1ctest,
+        COALESCE(age, 'Unknown')::VARCHAR as age,
+        COALESCE(CAST(n_emergency AS INT), 0) as n_emergency,
+        COALESCE(CAST(n_medications AS INT), 0) as n_medications
     FROM {{ source('medical_data', 'hospital_readmissions') }}
 ),
 
-
 renamed AS (
-SELECT
-    *
-FROM source     
-WHERE glucose_test_enum IS NOT NULL
+    SELECT
+        *
+    FROM source
+    WHERE glucose_test_enum != 'unknown'
 )
 
-select * from renamed
-
+SELECT * FROM renamed

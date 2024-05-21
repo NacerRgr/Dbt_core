@@ -2,31 +2,30 @@
 
 WITH source AS (
     SELECT
-        ROW_NUMBER() OVER() as id_healthcare, -- Génère un ID unique pour chaque ligne
-        CAST("Billing Amount" AS DECIMAL) as billing_amount,
-        "Discharge Date"::DATE as discharge_date,
-        CAST("Room Number" AS INT) as room_number,
-        "Test Results"::VARCHAR as test_results,
-        doctor::VARCHAR as doctor,
+        ROW_NUMBER() OVER() as id_healthcare,
+        COALESCE(CAST("Billing Amount" AS DECIMAL), 0) as billing_amount,
+        COALESCE("Discharge Date"::DATE, CURRENT_DATE) as discharge_date,
+        COALESCE(CAST("Room Number" AS INT), 0) as room_number,
+        COALESCE("Test Results"::VARCHAR, '') as test_results,
+        COALESCE(doctor::VARCHAR, '') as doctor,
         CASE 
-            WHEN gender = 'Male' THEN 1
-            WHEN gender = 'Female' THEN 2
-            ELSE NULL -- Gérer les cas inattendus
+            WHEN gender = 'Male' THEN 0
+            WHEN gender = 'Female' THEN 1
+            ELSE 1111 -- Utiliser 0 pour les valeurs inconnues ou non spécifiées
         END as gender_enum,
-        "Admission Type"::VARCHAR as admission_type,
-        "Date of Admission"::DATE as date_of_admission,
-        "Insurance Provider"::VARCHAR as insurance_provider,
-        "Name"::VARCHAR as name,
+        COALESCE("Admission Type"::VARCHAR, '') as admission_type,
+        COALESCE("Date of Admission"::DATE, CURRENT_DATE) as date_of_admission,
+        COALESCE("Insurance Provider"::VARCHAR, '') as insurance_provider,
+        COALESCE("Name"::VARCHAR, '') as name,
         CASE 
-            -- Convertir les types sanguins en une énumération spécifique, si nécessaire
             WHEN "Blood Type" IN ('A', 'B', 'AB', 'O', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-') THEN "Blood Type"
-            ELSE NULL -- Gérer les cas inattendus
+            ELSE 'Unknown'
         END as blood_type_enum,
-        medication::VARCHAR as medication,
-        hospital::VARCHAR as hospital,
-        "Medical Condition"::VARCHAR as medical_condition,
-        CAST(age AS INT) as age,
-        _airbyte_emitted_at as Time_stamp 
+        COALESCE(medication::VARCHAR, '') as medication,
+        COALESCE(hospital::VARCHAR, '') as hospital,
+        COALESCE("Medical Condition"::VARCHAR, '') as medical_condition,
+        COALESCE(CAST(age AS INT), 0) as age,
+        COALESCE(_airbyte_emitted_at, CURRENT_TIMESTAMP) as Time_stamp 
     FROM {{ source('medical_data', 'healthcare_dataset') }}
 ),
 
@@ -37,4 +36,3 @@ FROM source
 )
 
 select * from renamed
-

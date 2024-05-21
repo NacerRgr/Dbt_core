@@ -10,9 +10,9 @@ WITH rendez_vous AS (
         hd.date_of_admission AS rdv_date,
         hd.admission_type AS rdv_type
     FROM {{ ref('healthcare_dataset_stg') }} hd
-    LEFT JOIN {{ ref('patient_dim') }} pat ON hd.id_healthcare = pat.patient_id_from_stg
-    LEFT JOIN {{ ref('doctor_dim') }} doc ON hd.doctor = doc.doctor_name
-    LEFT JOIN {{ ref('hospital_dim') }} hosp ON hd.hospital = hosp.hospital_name
+    LEFT JOIN {{ ref('dim_patient') }} pat ON hd.id_healthcare = pat.id_patient
+    LEFT JOIN {{ ref('dim_doctor') }} doc ON hd.doctor = doc.doctor_name
+    LEFT JOIN {{ ref('dim_hospital') }} hosp ON hd.hospital = hosp.hospital_name
 )
 
 SELECT
