@@ -1,66 +1,32 @@
 {{ config(materialized='table') }}
 
-
 WITH source AS (
     SELECT
         ROW_NUMBER() OVER () AS id_mental, -- Génère un ID unique pour chaque ligne
-        CASE treatment
-            WHEN 'Yes' THEN 'Yes'
-            WHEN 'No' THEN 'No'
-            ELSE NULL
-        END as treatment,
-        CASE family_history
-            WHEN 'Yes' THEN 'Yes'
-            WHEN 'No' THEN 'No'
-            ELSE NULL
-        END as family_history,
-        CASE coping_struggles
-            WHEN 'Yes' THEN 'Yes'
-            WHEN 'No' THEN 'No'
-            ELSE NULL
-        END as coping_struggles,
-        CASE mood_swings
-            WHEN 'Low' THEN 'Low'
-            WHEN 'Medium' THEN 'Medium'
-            WHEN 'High' THEN 'High'
-            ELSE NULL
-        END as mood_swings,
-        work_interest::VARCHAR as work_interest,
-        mental_health_interview::VARCHAR as mental_health_interview,
-        occupation::VARCHAR as occupation,
-        days_indoors::VARCHAR as days_indoors,
-        care_options::VARCHAR as care_options,
-        social_weakness::VARCHAR as social_weakness,
-        CASE self_employed
-            WHEN 'Yes' THEN 'Yes'
-            WHEN 'No' THEN 'No'
-            ELSE NULL
-        END as self_employed,
-        country::VARCHAR as country,
-        CASE changes_habits
-            WHEN 'Yes' THEN 'Yes'
-            WHEN 'No' THEN 'No'
-            ELSE NULL
-        END as changes_habits,
-        CASE growing_stress
-            WHEN 'Yes' THEN 'Yes'
-            WHEN 'No' THEN 'No'
-            ELSE NULL
-        END as growing_stress,
-        CASE mental_health_history
-            WHEN 'Yes' THEN 'Yes'
-            WHEN 'No' THEN 'No'
-            ELSE NULL
-        END as mental_health_history
+        COALESCE(treatment, 'Unknown') AS treatment,
+        COALESCE(family_history, 'Unknown') AS family_history,
+        COALESCE(coping_struggles, 'Unknown') AS coping_struggles,
+        COALESCE(mood_swings, 'Unknown') AS mood_swings,
+        COALESCE(work_interest, 'Unknown')::VARCHAR AS work_interest,
+        COALESCE(mental_health_interview, 'Unknown')::VARCHAR AS mental_health_interview,
+        COALESCE(occupation, 'Unknown')::VARCHAR AS occupation,
+        COALESCE(days_indoors, 'Unknown')::VARCHAR AS days_indoors,
+        COALESCE(care_options, 'Unknown')::VARCHAR AS care_options,
+        COALESCE(social_weakness, 'Unknown')::VARCHAR AS social_weakness,
+        COALESCE(self_employed, 'Unknown') AS self_employed,
+        COALESCE(country, 'Unknown')::VARCHAR AS country,
+        COALESCE(changes_habits, 'Unknown') AS changes_habits,
+        COALESCE(growing_stress, 'Unknown') AS growing_stress,
+        COALESCE(mental_health_history, 'Unknown') AS mental_health_history,
+        COALESCE(_airbyte_emitted_at, CURRENT_TIMESTAMP) as Time_stamp 
+
     FROM {{ source('medical_data', 'mental_health_dataset') }}
 ),
 
-
 renamed AS (
-SELECT
-    *
-FROM source
+    SELECT
+        *
+    FROM source
 )
 
-select * from renamed
-
+SELECT * FROM renamed

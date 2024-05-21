@@ -4,7 +4,6 @@
 WITH source AS (
     SELECT DISTINCT
         ROW_NUMBER() OVER() as id_patient,
-        id_healthcare AS patient_id_from_stg,
         name AS patient_name,
         age AS patient_age,
         blood_type_enum AS blood_type,
