@@ -18,7 +18,6 @@ WITH mental_health AS (
    mth.id_mental is not null 
 )
 
-
 select  * from  mental_health 
 
 
